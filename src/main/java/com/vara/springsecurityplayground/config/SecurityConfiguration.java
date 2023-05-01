@@ -2,6 +2,7 @@ package com.vara.springsecurityplayground.config;
 
 
 import com.vara.springsecurityplayground.filters.RobotFilter;
+import com.vara.springsecurityplayground.filters.VaraAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -27,6 +28,7 @@ public class SecurityConfiguration {
                 .formLogin(withDefaults())
                 .oauth2Login(withDefaults())
                 .addFilterBefore(new RobotFilter(), UsernamePasswordAuthenticationFilter.class)
+                .authenticationProvider(new VaraAuthenticationProvider())
                 .build();
     }
 
