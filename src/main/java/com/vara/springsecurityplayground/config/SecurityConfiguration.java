@@ -3,6 +3,7 @@ package com.vara.springsecurityplayground.config;
 
 import com.vara.springsecurityplayground.filters.RobotAuthenticationProvider;
 import com.vara.springsecurityplayground.filters.RobotFilter;
+import com.vara.springsecurityplayground.filters.RobotLoginConfigurer;
 import com.vara.springsecurityplayground.filters.VaraAuthenticationProvider;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +35,7 @@ public class SecurityConfiguration {
             httpSecurity.getSharedObject(AuthenticationManagerBuilder.class).authenticationEventPublisher(authenticationEventPublisher);
         }
 
-        AuthenticationManager authenticationManager = new ProviderManager(new RobotAuthenticationProvider(List.of("beep-boop", "boop-boop")));
+//        AuthenticationManager authenticationManager = new ProviderManager(new RobotAuthenticationProvider(List.of("beep-boop", "boop-boop")));
 
         return httpSecurity
                 .authorizeRequests()
@@ -43,7 +44,9 @@ public class SecurityConfiguration {
                 .and()
                 .formLogin(withDefaults())
                 .oauth2Login(withDefaults())
-                .addFilterBefore(new RobotFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
+                .apply(new RobotLoginConfigurer())
+                .and()
+//                .addFilterBefore(new RobotFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(new VaraAuthenticationProvider())
                 .build();
     }
