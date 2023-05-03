@@ -17,12 +17,19 @@ import org.springframework.security.authentication.event.AuthenticationSuccessEv
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 
 @Configuration
@@ -38,12 +45,20 @@ public class SecurityConfiguration {
 //        AuthenticationManager authenticationManager = new ProviderManager(new RobotAuthenticationProvider(List.of("beep-boop", "boop-boop")));
 
         return httpSecurity
+                .csrf().disable()
+                .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeRequests()
                 .antMatchers("/marketing").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin(withDefaults())
-                .oauth2Login(withDefaults())
+                .oauth2Login(oauth2 -> oauth2.successHandler(new AuthenticationSuccessHandler() {
+                    @Override
+                    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+                        System.out.println(authentication.getName());
+                        // check and create user and give back the jwt
+                    }
+                }))
                 .apply(new RobotLoginConfigurer())
                 .and()
 //                .addFilterBefore(new RobotFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
